@@ -138,3 +138,5 @@ dmypy.json
 temp/
 _disciplines/
 files/
+
+log.txt
