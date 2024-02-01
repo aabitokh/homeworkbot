@@ -1,9 +1,7 @@
 from pydantic import BaseModel
 
-class StudentReport(BaseModel):
-    full_name: str = ''
-    points: float = 0
-    lab_completed: int = 0
-    deadlines_fails: int = 0
-    task_completed: int = 0
-    task_ratio: int = 0
+
+class StudentsGroup(BaseModel):
+    group_name: str
+    disciplines_short_name: list[str]
+    students: list[str]
