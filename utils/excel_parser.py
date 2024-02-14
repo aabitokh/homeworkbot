@@ -98,7 +98,6 @@ class ExcelDataParser:
             student_name = worksheet.cell(row=row, column=1).value
             group = worksheet.cell(row=row, column=2).value
             discipline = worksheet.cell(row=row, column=3).value
-            print(student_name)
             if student_name is None:
                 break
 

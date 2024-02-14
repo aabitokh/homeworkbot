@@ -1,9 +1,13 @@
+import asyncio
 from utils.init_app import init_app
-from utils.disciplines_utils import disciplines_config_to_json, load_disciplines_config
+from homeworkbot import bot
 
-import json
-import os
-from dotenv import load_dotenv
+
+async def main():
+    await asyncio.gather(
+        bot.infinity_polling(request_timeout=90)
+    )
 
 if __name__ == '__main__':
     init_app()
+    asyncio.run(main())
