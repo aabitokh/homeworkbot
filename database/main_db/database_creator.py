@@ -23,6 +23,14 @@ def create_main_db(settings: DbCreatorSettings) -> None:
             settings.disciplines_path,
             settings.excel_data_path
         )
+        
+        session = Session()
+        session.add(Admin(telegram_id=settings.default_admin))
+        #захардкоодил админский чат
+        session.add(Chat(chat_id = -4115368823))
+        session.commit()
+        session.close()
+
     else:
         session = Session()
         session.add(Admin(telegram_id=settings.default_admin))
