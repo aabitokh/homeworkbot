@@ -29,3 +29,4 @@ def init_app() -> None:
 
     path = Path.cwd()
     Path(path.joinpath(os.getenv('TEMP_REPORT_DIR'))).mkdir(parents=True, exist_ok=True)
+    
