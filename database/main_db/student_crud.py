@@ -20,6 +20,7 @@ def is_student(telegram_id: int) -> bool:
         return student is not None
 
 
+
 def set_telegram_id(full_name: str, telegram_id: int) -> None:
     with Session() as session:
         session.query(Student).filter(
