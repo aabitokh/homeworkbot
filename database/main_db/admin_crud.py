@@ -3,7 +3,14 @@ from model.main_db.admin import Admin
 from database.main_db.teacher_crud import is_teacher
 from model.main_db.chat import Chat
 from model.main_db.teacher import Teacher
+from model.main_db.group import Group
+from model.main_db.teacher_group import TeacherGroup
 
+from model.main_db.assigned_discipline import AssignedDiscipline
+from model.main_db.discipline import Discipline
+from model.main_db.student import Student
+from utils.disciplines_utils import disciplines_works_from_json
+from utils.homeworks_utils import create_homeworks, homeworks_to_json
 
 
 def add_chat(chat_id: int) -> None:
@@ -50,5 +57,49 @@ def add_teacher(full_name: str, tg_id: int) -> None:
         session.add(Teacher(full_name=full_name, telegram_id=tg_id))
         session.commit()
 
+def get_teachers() -> list[Teacher]:
+    with Session() as session:
+        return session.query(Teacher).all()
 
 
+def get_not_assign_teacher_groups(teacher_id: int) -> list[Group]:
+    with Session() as session:
+        assign_group = session.query(TeacherGroup).filter(
+            TeacherGroup.teacher_id == teacher_id
+        )
+        assign_group = [it.group_id for it in assign_group]
+        not_assign_group = session.query(Group).filter(
+            Group.id.not_in(assign_group)
+        ).all()
+        return not_assign_group
+
+
+def assign_teacher_to_group(teacher_id: int, group_id: int) -> None:
+    with Session() as session:
+        session.add(TeacherGroup(teacher_id=teacher_id, group_id=group_id))
+        session.commit()
+
+def get_all_groups() -> list[Group]:
+    with Session() as session:
+        return session.query(Group).all()
+
+
+def add_student(full_name: str, group_id: int, discipline_id: int):
+
+    session = Session()
+    student = Student(full_name=full_name, group=group_id)
+    session.add(student)
+    session.flush()
+    discipline: Discipline = session.query(Discipline).get(discipline_id)
+    empty_homework = create_homeworks(
+        disciplines_works_from_json(discipline.works)
+    )
+    session.add(
+        AssignedDiscipline(
+            student_id=student.id,
+            discipline_id=discipline_id,
+            home_work=homeworks_to_json(empty_homework)
+        )
+    )
+    session.commit()
+    session.close()

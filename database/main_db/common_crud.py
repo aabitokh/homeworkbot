@@ -7,6 +7,8 @@ from model.main_db.admin import Admin
 from model.main_db.student import Student
 from model.main_db.teacher import Teacher
 from model.main_db.chat import Chat
+from model.main_db.assigned_discipline import AssignedDiscipline
+from model.main_db.discipline import Discipline
 
 class UserEnum(Enum):
     Admin = 0
@@ -36,3 +38,14 @@ def get_chats() -> list[int]:
     with Session() as session:
         chats = session.query(Chat).all()
         return [it.chat_id for it in chats]
+    
+def get_group_disciplines(group_id: int) -> list[Discipline]:
+    with Session() as session:
+        disciplines = session.query(Discipline).join(
+            AssignedDiscipline,
+            AssignedDiscipline.discipline_id == Discipline.id
+        ).join(
+            Student,
+            Student.id == AssignedDiscipline.student_id
+        ).filter(Student.group == group_id).all()
+        return disciplines
