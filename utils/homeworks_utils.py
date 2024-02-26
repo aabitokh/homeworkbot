@@ -7,6 +7,7 @@ from model.pydantic.home_work import DisciplineHomeWorks, HomeWork, HomeTask
 
 
 def create_homeworks(discipline: DisciplineWorksConfig) -> DisciplineHomeWorks:
+    print(discipline)
     home_works_list: list[HomeWork] = []
     for it in discipline.works:
         home_tasks_list = [HomeTask(number=i)

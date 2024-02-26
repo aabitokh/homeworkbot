@@ -99,6 +99,7 @@ def add_student(full_name: str, group_id: int, discipline_id: int):
     empty_homework = create_homeworks(
         disciplines_works_from_json(discipline.works)
     )
+    print(empty_homework)
     session.add(
         AssignedDiscipline(
             student_id=student.id,
@@ -117,7 +118,7 @@ def add_discipline(discipline: DisciplineWorksConfig) -> None:
                 short_name=discipline.short_name,
                 path_to_test=discipline.path_to_test,
                 path_to_answer=discipline.path_to_answer,
-                works=disciplines_works_to_json(discipline),
+                works=discipline_works_to_json(discipline),
                 language=discipline.language,
                 max_tasks=counting_tasks(discipline),
                 max_home_works=len(discipline.works)

@@ -4,7 +4,6 @@ from telebot.types import KeyboardButton, ReplyKeyboardMarkup, Message
 
 from database.main_db import admin_crud
 from homeworkbot import bot
-from homeworkbot.unban_student import create_unban_student_buttons
 
 from model.main_db.teacher import Teacher
 from homeworkbot.admin_handlers.add_chat import _handle_add_chat
@@ -14,6 +13,7 @@ from homeworkbot.admin_handlers.utils import create_groups_button, create_teache
 from homeworkbot.admin_handlers.add_student import _handle_add_student
 from homeworkbot.admin_handlers.add_discipline import _handle_add_discipline
 from homeworkbot.admin_handlers.add_students_group import _handle_add_students_group
+from homeworkbot.admin_handlers.unban_student import create_unban_student_buttons
 
 
 class AdminException(Exception):
@@ -161,12 +161,7 @@ async def handle_commands(message: Message):
     command = get_current_admin_command(message.text)
     match command:
         case AdminCommand.ADD_CHAT:
-            @bot.message_handler(is_admin=True, func=lambda message: is_admin_command(message.text))
-            async def handle_commands(message: Message):
-                command = get_current_admin_command(message.text)
-                match command:
-                    case AdminCommand.ADD_CHAT:
-                        await _handle_add_chat(message)
+            await _handle_add_chat(message)
         case AdminCommand.ADD_STUDENT:
             await _handle_add_student(message)
         case AdminCommand.ADD_TEACHER:

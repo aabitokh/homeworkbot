@@ -12,7 +12,7 @@ from homeworkbot.filters import add_student_factory
 class AddStudentStep(IntEnum):
     SAVE = 1
     DISCIPLINE = 2
-
+#sad
 
 class ProcessAddStudent(BaseModel):
     full_name: str = ''
