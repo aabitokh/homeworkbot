@@ -11,9 +11,8 @@ from homeworkbot.admin_handlers.add_chat import _handle_add_chat
 from homeworkbot.admin_handlers.add_teacher import _handle_add_teacher
 from homeworkbot.admin_handlers.utils import create_teachers_button
 from homeworkbot.admin_handlers.add_student import _handle_add_student
+from homeworkbot.admin_handlers.add_discipline import _handle_add_discipline
 
-
-            
 
 
 class AdminException(Exception):
@@ -174,7 +173,7 @@ async def handle_commands(message: Message):
         case AdminCommand.ADD_STUDENTS_GROUP:
             ...
         case AdminCommand.ADD_DISCIPLINE:
-            ...
+            await _handle_add_discipline(message)
         case AdminCommand.BAN_STUDENT:
             ...
         case AdminCommand.UNBAN_STUDENT:
