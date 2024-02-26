@@ -10,3 +10,5 @@ import homeworkbot.admin_handlers.add_student as add_student
 import homeworkbot.admin_handlers.add_discipline as add_discipline
 import homeworkbot.admin_handlers.add_students_group as add_students_group
 
+import homeworkbot.admin_handlers.ban_student as ban_student
+import homeworkbot.admin_handlers.unban_student as unban_student

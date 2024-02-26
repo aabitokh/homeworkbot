@@ -4,12 +4,13 @@ from telebot.types import KeyboardButton, ReplyKeyboardMarkup, Message
 
 from database.main_db import admin_crud
 from homeworkbot import bot
+from homeworkbot.unban_student import create_unban_student_buttons
 
 from model.main_db.teacher import Teacher
 from homeworkbot.admin_handlers.add_chat import _handle_add_chat
 
 from homeworkbot.admin_handlers.add_teacher import _handle_add_teacher
-from homeworkbot.admin_handlers.utils import create_teachers_button
+from homeworkbot.admin_handlers.utils import create_groups_button, create_teachers_button
 from homeworkbot.admin_handlers.add_student import _handle_add_student
 from homeworkbot.admin_handlers.add_discipline import _handle_add_discipline
 from homeworkbot.admin_handlers.add_students_group import _handle_add_students_group
@@ -175,9 +176,9 @@ async def handle_commands(message: Message):
         case AdminCommand.ADD_DISCIPLINE:
             await _handle_add_discipline(message)
         case AdminCommand.BAN_STUDENT:
-            ...
+            await create_groups_button(message, 'groupBan')
         case AdminCommand.UNBAN_STUDENT:
-            ...
+            await create_unban_student_buttons(message)
         case AdminCommand.NEXT:
             if message.from_user.id not in __menu_index:
                 __menu_index[message.from_user.id] = 1

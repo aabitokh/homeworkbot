@@ -9,6 +9,14 @@ from model.main_db.teacher import Teacher
 from model.main_db.chat import Chat
 from model.main_db.assigned_discipline import AssignedDiscipline
 from model.main_db.discipline import Discipline
+from sqlalchemy import exists
+
+from database.main_db import admin_crud
+
+from model.main_db.group import Group
+from model.main_db.student_ban import StudentBan
+from model.main_db.teacher_group import TeacherGroup
+
 
 class UserEnum(Enum):
     Admin = 0
@@ -49,3 +57,94 @@ def get_group_disciplines(group_id: int) -> list[Discipline]:
             Student.id == AssignedDiscipline.student_id
         ).filter(Student.group == group_id).all()
         return disciplines
+    
+def ban_student(telegram_id: int) -> None:
+    """
+    Функция для записи идентификатора студента в бан-лист
+
+    :param telegram_id: телеграм id студента
+
+    :return: None
+    """
+    with Session() as session:
+        session.add(StudentBan(telegram_id=telegram_id))
+        session.commit()
+
+
+def unban_student(telegram_id: int) -> None:
+    """
+    Функция для удаления идентификатора студента из бан-листа
+
+    :param telegram_id: телеграм id студента
+
+    :return: None
+    """
+    with Session() as session:
+        student = session.query(StudentBan).filter(StudentBan.telegram_id == telegram_id)
+        student.delete(synchronize_session='fetch')
+        session.commit()
+
+
+def is_ban(telegram_id: int) -> bool:
+    """
+    Функция проверки нахождения студента в бан-листе
+
+    :param telegram_id: телеграм id студента
+
+    :return: True, если студент забанен, иначе False
+    """
+    with Session() as session:
+        tg_id = session.query(StudentBan).get(telegram_id)
+        return tg_id is not None
+
+
+def get_ban_students(teacher_telegram_id: int) -> list[Student]:
+    """
+    Функция запроса списка забаненных студентов в группах, где
+    ведет конкретный преподаватель или всех студентов, если
+    запрос производится в режиме администратора
+
+    :param teacher_telegram_id: телеграм id препода/админа
+
+    :return: список забаненных студентов
+    """
+    with Session() as session:
+        if admin_crud.is_admin_no_teacher_mode(teacher_telegram_id):
+            students = session.query(Student).filter(
+                exists().where(StudentBan.telegram_id == Student.telegram_id)
+            ).all()
+            return students
+        else:
+            students = session.query(Student).filter(
+                exists().where(StudentBan.telegram_id == Student.telegram_id)
+            ).join(
+                Group,
+                Group.id == Student.group
+            ).join(
+                TeacherGroup,
+                TeacherGroup.group_id == Group.id
+            ).join(
+                Teacher,
+                Teacher.id == TeacherGroup.teacher_id
+            ).filter(
+                Teacher.telegram_id == teacher_telegram_id
+            ).all()
+            return students
+
+def get_students_from_group_for_ban(group_id: int) -> list[Student]:
+    """
+    Функция запроса студентов группы, которых можно забанить
+
+    :param group_id: идетификатор группы
+
+    :return: список студентов
+    """
+    with Session() as session:
+        students = session.query(Student).filter(
+                and_(
+                    Student.group == group_id,
+                    Student.telegram_id.is_not(None),
+                    ~exists().where(StudentBan.telegram_id == Student.telegram_id)
+                )
+        ).all()
+        return students

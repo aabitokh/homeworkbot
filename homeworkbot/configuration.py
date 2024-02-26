@@ -6,6 +6,7 @@ from telebot import asyncio_filters
 from telebot.asyncio_storage import StateMemoryStorage
 from homeworkbot.filters import AddStudentCallbackFilter
 from homeworkbot.filters import IsAdmin, IsStudent, IsTeacher
+from homeworkbot.middlewares import BanMiddleware
 
 load_dotenv()
 
@@ -18,3 +19,5 @@ bot.add_custom_filter(IsAdmin())
 bot.add_custom_filter(IsStudent())
 bot.add_custom_filter(IsTeacher())
 bot.add_custom_filter(AddStudentCallbackFilter())
+
+bot.setup_middleware(BanMiddleware(bot))
