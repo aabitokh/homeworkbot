@@ -199,7 +199,7 @@ async def handle_commands(message: Message):
         case AdminCommand.SET_TEACHER_TO_GROUP:
             await create_teachers_button(message, 'assignTeacherGR')
         case AdminCommand.SET_TEACHER_TO_DISCIPLINE:
-            ...
+            await create_teachers_button(message, 'assignTeacherDis')
         case AdminCommand.DELETE_GROUP:
             ...
         case AdminCommand.DELETE_STUDENT:

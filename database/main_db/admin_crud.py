@@ -16,6 +16,7 @@ from utils.disciplines_utils import disciplines_works_from_json, disciplines_wor
 from sqlalchemy.exc import IntegrityError
 from database.main_db.crud_exceptions import DisciplineNotFoundException, GroupAlreadyExistException
 from model.pydantic.students_group import StudentsGroup
+from model.main_db.teacher_discipline import TeacherDiscipline
 
 
 def add_chat(chat_id: int) -> None:
@@ -118,7 +119,7 @@ def add_discipline(discipline: DisciplineWorksConfig) -> None:
                 short_name=discipline.short_name,
                 path_to_test=discipline.path_to_test,
                 path_to_answer=discipline.path_to_answer,
-                works=discipline_works_to_json(discipline),
+                works=disciplines_works_to_json(discipline),
                 language=discipline.language,
                 max_tasks=counting_tasks(discipline),
                 max_home_works=len(discipline.works)
@@ -174,3 +175,20 @@ def add_students_group(student_groups: list[StudentsGroup]) -> None:
         raise GroupAlreadyExistException(f'{ex.params[0]} уже существует')
     finally:
         session.close()
+
+def assign_teacher_to_discipline(teacher_id: int, discipline_id: int) -> None:
+    with Session() as session:
+        session.add(TeacherDiscipline(teacher_id=teacher_id, discipline_id=discipline_id))
+        session.commit()
+
+
+def get_not_assign_teacher_discipline(teacher_id: int) -> list[Discipline]:
+    with Session() as session:
+        assign_discipline = session.query(TeacherDiscipline).filter(
+            TeacherDiscipline.teacher_id == teacher_id
+        )
+        assign_discipline = [it.discipline_id for it in assign_discipline]
+        not_assign_discipline = session.query(Discipline).filter(
+            Discipline.id.not_in(assign_discipline)
+        ).all()
+        return not_assign_discipline

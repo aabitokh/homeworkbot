@@ -12,3 +12,4 @@ import homeworkbot.admin_handlers.add_students_group as add_students_group
 
 import homeworkbot.admin_handlers.ban_student as ban_student
 import homeworkbot.admin_handlers.unban_student as unban_student
+import homeworkbot.admin_handlers.assign_teacher_to_discipline as assign_teacher_to_discipline
