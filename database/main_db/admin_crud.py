@@ -192,3 +192,59 @@ def get_not_assign_teacher_discipline(teacher_id: int) -> list[Discipline]:
             Discipline.id.not_in(assign_discipline)
         ).all()
         return not_assign_discipline
+    
+def delete_group(group_id: int) -> None:
+    with Session() as session:
+        session.query(Group).filter(
+            Group.id == group_id
+        ).delete(synchronize_session='fetch')
+        session.query(TeacherGroup).filter(
+            TeacherGroup.group_id == group_id
+        ).delete(synchronize_session='fetch')
+
+        students = session.query(Student).filter(Student.group == group_id).all()
+
+        if not students:
+            session.commit()
+            return
+        students_id = [it.id for it in students]
+        session.query(AssignedDiscipline).filter(
+            AssignedDiscipline.student_id.in_(students_id)
+        ).delete(synchronize_session='fetch')
+        session.query(Student).filter(Student.group == group_id).delete(synchronize_session='fetch')
+        session.commit()
+
+
+def delete_student(student_id: int) -> None:
+    with Session() as session:
+        session.query(Student).filter(Student.id == student_id).delete(synchronize_session='fetch')
+        session.query(AssignedDiscipline).filter(
+            AssignedDiscipline.student_id == student_id
+        ).delete(synchronize_session='fetch')
+        session.commit()
+
+
+def delete_teacher(teacher_id: int) -> None:
+    with Session() as session:
+        session.query(Teacher).filter(
+            Teacher.id == teacher_id
+        ).delete(synchronize_session='fetch')
+
+        session.query(TeacherGroup).filter(
+            TeacherGroup.teacher_id == teacher_id
+        ).delete(synchronize_session='fetch')
+
+        session.query(TeacherDiscipline).filter(
+            TeacherDiscipline.teacher_id == teacher_id
+        ).delete(synchronize_session='fetch')
+
+        session.commit()
+
+def get_all_disciplines() -> list[Discipline]:
+    with Session() as session:
+        return session.query(Discipline).all()
+
+
+def get_discipline(discipline_id: int) -> Discipline:
+    with Session() as session:
+        return session.query(Discipline).get(discipline_id)
