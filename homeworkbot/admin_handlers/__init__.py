@@ -17,3 +17,4 @@ import homeworkbot.admin_handlers.delete_group as delete_group
 import homeworkbot.admin_handlers.delete_teacher as delete_teacher
 import homeworkbot.admin_handlers.delete_student as delete_student
 import homeworkbot.admin_handlers.upload_tests as upload_tests
+import homeworkbot.admin_handlers.upload_start_configuration as upload_start_configuration

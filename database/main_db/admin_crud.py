@@ -1,3 +1,4 @@
+import os
 from database.main_db.database import Session
 from model.main_db.admin import Admin
 from database.main_db.teacher_crud import is_teacher
@@ -17,6 +18,13 @@ from sqlalchemy.exc import IntegrityError
 from database.main_db.crud_exceptions import DisciplineNotFoundException, GroupAlreadyExistException
 from model.pydantic.students_group import StudentsGroup
 from model.main_db.teacher_discipline import TeacherDiscipline
+
+
+from database.main_db.crud_exceptions import DisciplineNotFoundException, GroupAlreadyExistException, \
+    DisciplineAlreadyExistException, GroupNotFoundException
+
+from model.pydantic.db_start_data import DbStartData
+
 
 
 def add_chat(chat_id: int) -> None:
@@ -100,7 +108,7 @@ def add_student(full_name: str, group_id: int, discipline_id: int):
     empty_homework = create_homeworks(
         disciplines_works_from_json(discipline.works)
     )
-    print(empty_homework)
+    #print(empty_homework)
     session.add(
         AssignedDiscipline(
             student_id=student.id,
@@ -248,3 +256,128 @@ def get_all_disciplines() -> list[Discipline]:
 def get_discipline(discipline_id: int) -> Discipline:
     with Session() as session:
         return session.query(Discipline).get(discipline_id)
+
+def remote_start_db_fill(data: DbStartData) -> None:
+    """
+    Функция для стартовой конфигурации системы через загрузку json-файла
+
+    :param data: данные по предметам, студентам, группам и преподавателям, а также
+    какие дисциплины кому назначены и какой преподаватель их ведет
+
+    :raises DisciplineNotFoundException: дисциплина не найдена
+    :raises DisciplineAlreadyExistException: дисциплина уже существует (дублируется)
+    :raises GroupAlreadyExistException: если группа с таким названием уже существует
+    :raises GroupNotFoundException: если группа с таким названием не найдена
+
+    :return: None
+    """
+    session = Session()
+    session.begin()
+    admin_default_tg = int(os.getenv("DEFAULT_ADMIN"))
+    dis_short_names = {}
+    groups_name = {}
+
+    try:
+        for discipline in data.disciplines:
+            if discipline.short_name in dis_short_names:
+                raise DisciplineAlreadyExistException(f"{discipline.short_name} дублируется")
+            dis = Discipline(
+                    full_name=discipline.full_name,
+                    short_name=discipline.short_name,
+                    path_to_test=discipline.path_to_test,
+                    path_to_answer=discipline.path_to_answer,
+                    works=disciplines_works_to_json(discipline),
+                    language=discipline.language,
+                    max_tasks=counting_tasks(discipline),
+                    max_home_works=len(discipline.works)
+                )
+            session.add(dis)
+            session.flush()
+            dis_short_names[discipline.short_name] = dis.id
+
+        for it in data.groups:
+            group = Group(group_name=it.group_name)
+            session.add(group)
+            session.flush()
+            groups_name[it.group_name] = group.id
+
+            students = [
+                Student(
+                    full_name=student_raw,
+                    group=group.id)
+                for student_raw in it.students
+            ]
+            session.add_all(students)
+            session.flush()
+
+            for discipline in it.disciplines_short_name:
+                current_discipline = session.query(Discipline).filter(
+                    Discipline.short_name.ilike(f"%{discipline}%")
+                ).first()
+                if current_discipline is None:
+                    raise DisciplineNotFoundException(f'{discipline} нет в БД')
+
+                empty_homework = create_homeworks(
+                    disciplines_works_from_json(current_discipline.works)
+                )
+                session.add_all([
+                    AssignedDiscipline(
+                        student_id=student.id,
+                        discipline_id=current_discipline.id,
+                        home_work=homeworks_to_json(empty_homework)
+                    ) for student in students]
+                )
+
+        for it in data.teachers:
+            teacher = Teacher(
+                full_name=it.full_name,
+                telegram_id=it.telegram_id
+            )
+            session.add(teacher)
+            session.flush()
+            for tgr in it.assign_groups:
+                if tgr not in groups_name:
+                    raise GroupNotFoundException(f'Группа {tgr} не найдена')
+                session.add(
+                    TeacherGroup(
+                        teacher_id=teacher.id,
+                        group_id=groups_name[tgr]
+                    )
+                )
+
+            for tdis in it.assign_disciplines:
+                if tdis not in dis_short_names:
+                    raise DisciplineNotFoundException(f'Дисчиплина {tdis} не найдена')
+                session.add(
+                    TeacherDiscipline(
+                        teacher_id=teacher.id,
+                        discipline_id=dis_short_names[tdis]
+                    )
+                )
+
+            if it.is_admin and teacher.telegram_id != admin_default_tg:
+                session.add(
+                    Admin(
+                        telegram_id=teacher.telegram_id
+                    )
+                )
+
+        for chat in data.chats:
+            session.add(
+                Chat(chat_id=chat)
+            )
+        session.commit()
+    except DisciplineNotFoundException as ex:
+        session.rollback()
+        raise ex
+    except DisciplineAlreadyExistException as daex:
+        session.rollback()
+        raise daex
+    except GroupNotFoundException as gnfex:
+        session.rollback()
+        raise gnfex
+    except IntegrityError as ex:
+        session.rollback()
+        raise GroupAlreadyExistException(f'{ex.params[0]} уже существует')
+    finally:
+        session.close()

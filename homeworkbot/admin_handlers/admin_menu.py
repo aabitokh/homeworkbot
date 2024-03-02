@@ -15,7 +15,9 @@ from homeworkbot.admin_handlers.add_discipline import _handle_add_discipline
 from homeworkbot.admin_handlers.add_students_group import _handle_add_students_group
 from homeworkbot.admin_handlers.unban_student import create_unban_student_buttons
 from homeworkbot.admin_handlers.upload_tests import _handle_upload_tests
+from homeworkbot.admin_handlers.upload_start_configuration import _handle_upload_start_configuration
 
+            
 class AdminException(Exception):
     ...
 
@@ -209,7 +211,7 @@ async def handle_commands(message: Message):
         case AdminCommand.UPLOAD_TESTS:
             await _handle_upload_tests(message)
         case AdminCommand.UPLOAD_CONFIGURATION:
-            ...
+            await _handle_upload_start_configuration(message)
         case AdminCommand.SWITCH_TO_TEACHER:
             ...
         case AdminCommand.DOWNLOAD_FULL_REPORT:

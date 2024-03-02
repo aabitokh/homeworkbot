@@ -47,4 +47,4 @@ class FirstRunConfigurator:
         return homeworks_to_json(empty_homework)
     
     def disciplines_works_to_json(self, discipline: DisciplineWorksConfig) -> str:
-        return discipline_works_to_json(discipline)
+        return disciplines_works_to_json(discipline)

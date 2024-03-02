@@ -68,7 +68,7 @@ def fill_db_from_files(disciplines_path: str,
             session.flush()
 
             for student_raw in students_raw_list:
-                print(student_raw)
+                #print(student_raw)
                 student = Student(
                     full_name=student_raw.full_name,
                     group=groups[group_name].id
