@@ -16,7 +16,8 @@ from homeworkbot.admin_handlers.add_students_group import _handle_add_students_g
 from homeworkbot.admin_handlers.unban_student import create_unban_student_buttons
 from homeworkbot.admin_handlers.upload_tests import _handle_upload_tests
 from homeworkbot.admin_handlers.upload_start_configuration import _handle_upload_start_configuration
-
+from homeworkbot.admin_handlers.utils import create_teachers_button, create_groups_button, create_discipline_button
+from homeworkbot.admin_handlers.download_all_test_and_answer import _handle_download_all_test_and_answer
             
 class AdminException(Exception):
     ...
@@ -217,11 +218,12 @@ async def handle_commands(message: Message):
         case AdminCommand.DOWNLOAD_FULL_REPORT:
             ...
         case AdminCommand.DOWNLOAD_ANSWER:
-            ...
+            await _handle_download_all_test_and_answer(message)
+
         case AdminCommand.DOWNLOAD_FINISH_REPORT:
             ...
         case AdminCommand.DOWNLOAD_SHORT_REPORT:
             ...
         case AdminCommand.DOWNLOAD_ALL_ANSWER_WITH_TEST:
-            ...
+            await _handle_download_all_test_and_answer(message)
             

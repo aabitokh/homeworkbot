@@ -18,3 +18,6 @@ import homeworkbot.admin_handlers.delete_teacher as delete_teacher
 import homeworkbot.admin_handlers.delete_student as delete_student
 import homeworkbot.admin_handlers.upload_tests as upload_tests
 import homeworkbot.admin_handlers.upload_start_configuration as upload_start_configuration
+
+import homeworkbot.admin_handlers.download_all_test_and_answer as download_all_test_and_answer
+import homeworkbot.admin_handlers.download_answers as download_answers

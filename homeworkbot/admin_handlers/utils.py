@@ -88,3 +88,22 @@ async def create_callback_students_button(
         call.message.id,
         reply_markup=markup,
     )
+
+async def create_discipline_button(message: Message, callback_prefix: str):
+    disciplines = admin_crud.get_all_disciplines()
+    if len(disciplines) < 1:
+        await bot.send_message(message.chat.id, "В БД отсутствуют дисциплины!")
+        return
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(
+        *[InlineKeyboardButton(
+            it.short_name,
+            callback_data=f'{callback_prefix}_{it.id}'
+        ) for it in disciplines]
+    )
+    await bot.send_message(
+        message.chat.id,
+        "Выберете дисциплину:",
+        reply_markup=markup
+    )
