@@ -162,3 +162,21 @@ def get_students_from_group(group_id) -> list[Student]:
                 Student.group == group_id
         ).all()
         return students
+    
+def get_group(group_id: int) -> Group:
+    with Session() as session:
+        return session.query(Group).get(group_id)
+
+
+def get_discipline(discipline_id: int) -> Discipline:
+    with Session() as session:
+        return session.query(Discipline).get(discipline_id)
+
+
+def get_student_discipline_answer(student_id: int, discipline_id: int) -> AssignedDiscipline:
+    with Session() as session:
+        answers = session.query(AssignedDiscipline).filter(
+            AssignedDiscipline.student_id == student_id,
+            AssignedDiscipline.discipline_id == discipline_id
+        ).first()
+        return answers
