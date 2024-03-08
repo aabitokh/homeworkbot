@@ -8,6 +8,7 @@ from homeworkbot.admin_handlers import admin_keyboard
 import database.main_db.common_crud as common_crud
 from database.main_db import student_crud
 from database.main_db.common_crud import UserEnum
+from homeworkbot.teacher_handlers.teacher_menu import create_teacher_keyboard
 
 
 class AuthStates(StatesGroup):
@@ -42,7 +43,7 @@ async def handle_start(message: Message):
                 message.chat.id,
                 'Приветствую! Надеюсь, что в этом году студенты вас не разочаруют!',
                 parse_mode='HTML',
-                # TODO: клавиатура
+                reply_markup=create_teacher_keyboard(message),
             )
         case UserEnum.Student:
             await bot.send_message(

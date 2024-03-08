@@ -381,3 +381,12 @@ def remote_start_db_fill(data: DbStartData) -> None:
         raise GroupAlreadyExistException(f'{ex.params[0]} уже существует')
     finally:
         session.close()
+
+def switch_admin_mode_to_teacher(admin_id: int) -> None:
+    with Session() as session:
+        session.query(Admin).filter(
+            Admin.telegram_id == admin_id
+        ).update(
+            {'teacher_mode': True}
+        )
+        session.commit()
