@@ -1,3 +1,4 @@
+from operator import and_
 from database.main_db.database import Session
 from model.main_db.teacher import Teacher
 from model.main_db.assigned_discipline import AssignedDiscipline
@@ -98,3 +99,13 @@ def get_teacher_disciplines(teacher_tg_id: int) -> list[Discipline]:
             Teacher.telegram_id == teacher_tg_id
         ).all()
         return disciplines
+
+def get_auth_students(group_id: int) -> list[Student]:
+    with Session() as session:
+        students = session.query(Student).filter(
+            and_(
+                Student.group == group_id,
+                Student.telegram_id.is_not(None),
+            )
+        ).all()
+        return students

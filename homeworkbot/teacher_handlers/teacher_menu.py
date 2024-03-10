@@ -82,7 +82,7 @@ async def handle_commands(message: Message):
         case TeacherCommand.UNBAN_STUDENT:
             ...
         case TeacherCommand.INTERACTIVE_REPORT:
-            ...
+            await create_teacher_groups_button(message, 'interactiveGrRep')
         case TeacherCommand.DOWNLOAD_ANSWER:
             await create_teacher_discipline_button(message, 'dowTAnswersDis')
 
