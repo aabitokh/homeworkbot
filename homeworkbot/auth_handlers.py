@@ -8,6 +8,7 @@ from homeworkbot.admin_handlers import admin_keyboard
 import database.main_db.common_crud as common_crud
 from database.main_db import student_crud
 from database.main_db.common_crud import UserEnum
+from homeworkbot.student_handlers.student_menu import student_keyboard
 from homeworkbot.teacher_handlers.teacher_menu import create_teacher_keyboard
 
 
@@ -50,7 +51,7 @@ async def handle_start(message: Message):
                 message.chat.id,
                 'С возвращением! О, юнный падаван ;)',
                 parse_mode='HTML',
-                # TODO: клавиатура
+                reply_markup=student_keyboard(message),
             )
         case _:
             chats = common_crud.get_chats()
@@ -121,10 +122,10 @@ async def input_full_name(message: Message):
         if student_crud.has_student(full_name):
             student_crud.set_telegram_id(full_name, message.from_user.id)
             await bot.send_message(
-                message.chat.id,
-                'Поздравляю! Вы успешно авторизовались!',
-                # TODO: клавиатура
-            )
+                            message.chat.id,
+                            'Поздравляю! Вы успешно авторизовались!',
+                            reply_markup=student_keyboard(message),
+                        )
             await bot.delete_state(message.from_user.id, message.chat.id)
         else:
             await bot.send_message(
