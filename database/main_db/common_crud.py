@@ -1,5 +1,6 @@
 # common_crud.py
 from enum import Enum
+from operator import and_, not_
 
 from database.main_db.database import Session
 
@@ -135,17 +136,17 @@ def get_students_from_group_for_ban(group_id: int) -> list[Student]:
     """
     Функция запроса студентов группы, которых можно забанить
 
-    :param group_id: идетификатор группы
+    :param group_id: идентификатор группы
 
     :return: список студентов
     """
     with Session() as session:
         students = session.query(Student).filter(
-                and_(
-                    Student.group == group_id,
-                    Student.telegram_id.is_not(None),
-                    ~exists().where(StudentBan.telegram_id == Student.telegram_id)
-                )
+            and_(
+                Student.group == group_id,
+                Student.telegram_id.is_not(None)
+            ),
+            ~exists().where(StudentBan.telegram_id == Student.telegram_id)
         ).all()
         return students
 

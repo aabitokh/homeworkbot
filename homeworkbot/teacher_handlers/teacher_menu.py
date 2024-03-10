@@ -7,7 +7,7 @@ import homeworkbot.admin_handlers.admin_menu as admin_keyboard
 from database.main_db.admin_crud import is_admin
 from homeworkbot import bot
 from homeworkbot.teacher_handlers.utils import create_teacher_groups_button, create_teacher_discipline_button
-
+from homeworkbot.admin_handlers.unban_student import create_unban_student_buttons
 
 class TeacherException(Exception):
     ...
@@ -78,9 +78,9 @@ async def handle_commands(message: Message):
         case TeacherCommand.DOWNLOAD_SHORT_REPORT:
             await create_teacher_groups_button(message, 'shortReport')
         case TeacherCommand.BAN_STUDENT:
-            ...
+            await create_teacher_groups_button(message, 'groupBan')
         case TeacherCommand.UNBAN_STUDENT:
-            ...
+            await create_unban_student_buttons(message)
         case TeacherCommand.INTERACTIVE_REPORT:
             await create_teacher_groups_button(message, 'interactiveGrRep')
         case TeacherCommand.DOWNLOAD_ANSWER:
