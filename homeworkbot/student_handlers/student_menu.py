@@ -1,6 +1,7 @@
 from enum import Enum, auto
 
 from telebot.types import KeyboardButton, Message, ReplyKeyboardMarkup
+from homeworkbot.student_handlers.utils import create_student_disciplines_button
 
 from homeworkbot import bot
 
@@ -45,7 +46,7 @@ async def handle_commands(message: Message):
         case StudentCommand.NEAREST_DEADLINE:
             ...
         case StudentCommand.ACADEMIC_PERFORMANCE:
-            ...
+            await create_student_disciplines_button(message, 'academicPerf')
 
 
 def is_student_command(command: str) -> bool:
