@@ -4,6 +4,7 @@ from telebot.types import KeyboardButton, Message, ReplyKeyboardMarkup
 from homeworkbot.student_handlers.utils import create_student_disciplines_button
 
 from homeworkbot import bot
+from homeworkbot.student_handlers.utils import create_student_disciplines_button
 
 
 class StudentException(Exception):
@@ -44,7 +45,7 @@ async def handle_commands(message: Message):
         case StudentCommand.UPLOAD_ANSWER:
             ...
         case StudentCommand.NEAREST_DEADLINE:
-            ...
+            await create_student_disciplines_button(message, 'nearestDeadline')
         case StudentCommand.ACADEMIC_PERFORMANCE:
             await create_student_disciplines_button(message, 'academicPerf')
 
