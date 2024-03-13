@@ -7,6 +7,8 @@ from telebot.asyncio_storage import StateMemoryStorage
 from homeworkbot.filters import AddStudentCallbackFilter
 from homeworkbot.filters import IsAdmin, IsStudent, IsTeacher
 from homeworkbot.middlewares import BanMiddleware
+from distutils.util import strtobool
+from homeworkbot.middlewares import BanMiddleware, StudentFloodMiddleware
 
 load_dotenv()
 
@@ -21,3 +23,12 @@ bot.add_custom_filter(IsTeacher())
 bot.add_custom_filter(AddStudentCallbackFilter())
 
 bot.setup_middleware(BanMiddleware(bot))
+
+if bool(strtobool(os.getenv("FLOOD_MIDDLEWARE"))):
+    bot.setup_middleware(
+        StudentFloodMiddleware(
+            bot,
+            int(os.getenv("STUDENT_UPLOAD_LIMIT")),
+            int(os.getenv("STUDENT_COMMAND_LIMIT"))
+        )
+    )
