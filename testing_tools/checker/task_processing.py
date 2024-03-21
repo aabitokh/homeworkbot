@@ -3,6 +3,9 @@ from pathlib import Path
 
 from database.queue_db import queue_in_crud
 from model.queue_db.queue_in import QueueIn
+from database.queue_db import queue_in_crud, rejected_crud
+from model.pydantic.test_rejected_files import TestRejectedFiles, RejectedType
+from testing_tools.checker.folder_builder import FolderBuilder
 
 
 class TaskProcessing:
@@ -53,4 +56,18 @@ def _run_prepare_docker(record: QueueIn, temp_folder_path: Path) -> None:
 
     :return: None
     """
-    ...
+    folder_builder = FolderBuilder(temp_folder_path, record)
+    docker_folder_path = folder_builder.build()
+    if folder_builder.has_rejected_files():
+        rejected_crud.add_record(
+            record.telegram_id,
+            record.chat_id,
+            TestRejectedFiles(
+                type=RejectedType.TemplateError,
+                description='Имя файла(-ов) не соответствуют шаблону для тестирования',
+                files=folder_builder.get_rejected_file_names()
+            )
+        )
+
+    if not folder_builder.has_file_for_test():
+        return None

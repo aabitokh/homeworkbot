@@ -33,6 +33,7 @@ class AnswerProcessing:
         self.bot = bot
 
     async def run(self):
+        #функция асинхронная чтобы высвобождать ресурсы, пока работает бот -- работат и запросы к очереди на обработку 
         while True:
             await asyncio.sleep(2)
             if queue_out_crud.is_not_empty():
