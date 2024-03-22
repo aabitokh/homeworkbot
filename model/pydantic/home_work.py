@@ -9,10 +9,11 @@ class HomeTask(BaseModel):
 
 class HomeWork(BaseModel):
     number: int
-    deadline: date 
+    deadline: date
     tasks: list[HomeTask]
     is_done: bool = False
-    end_time: datetime | None = None 
+    tasks_completed: int = 0
+    end_time: datetime | None = None
 
 class DisciplineHomeWorks(BaseModel):
     home_works: list[HomeWork]

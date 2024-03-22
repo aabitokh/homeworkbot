@@ -18,6 +18,15 @@ from model.main_db.group import Group
 from model.main_db.student_ban import StudentBan
 from model.main_db.teacher_group import TeacherGroup
 
+import json
+from datetime import datetime
+
+import utils.homeworks_utils as utils
+
+from model.pydantic.queue_in_raw import QueueInRaw
+from model.queue_db.queue_in import QueueIn
+from testing_tools.logger.report_model import LabReport
+
 
 class UserEnum(Enum):
     Admin = 0
@@ -185,3 +194,68 @@ def get_student_discipline_answer(student_id: int, discipline_id: int) -> Assign
 def get_student_from_id(student_id: int) -> Student:
     with Session() as session:
         return session.query(Student).get(student_id)
+    
+def write_test_result(lab_report: LabReport, input_record: QueueIn) -> None:
+    """
+    Функция записи результата тестирования заданий из л/р или домашки с
+    расчетом заработанных балов по выполнению работы. Если успевает до деллайнов,
+    то все норм. Иначе баллы срезаются в 2 раза.
+
+    :param lab_report: отчет по результатам тестирования заданий работы
+    :param input_record: исходные данные, отправляемые на тестирование
+
+    :return: None
+    """
+    session = Session()
+    task_raw = QueueInRaw(**json.loads(input_record.data))
+
+    student = session.query(Student).filter(
+        Student.telegram_id == input_record.telegram_id
+    ).first()
+
+    assig_discipline = session.query(AssignedDiscipline).filter(
+        AssignedDiscipline.student_id == student.id,
+        AssignedDiscipline.discipline_id == task_raw.discipline_id
+    ).first()
+
+    hwork = utils.homeworks_from_json(assig_discipline.home_work)
+
+    lab = None
+    for it in hwork.home_works:
+        if lab_report.lab_id == it.number:
+            lab = it
+            break
+
+    task_done = 0
+    for task in lab.tasks:
+        task_done += 1 if task.is_done else 0
+        for task_result in lab_report.tasks:
+            if task.number == task_result.task_id:
+                task.amount_tries += 1
+                task.last_try_time = task_result.time
+                if not task.is_done and task_result.status:
+                    task.is_done = True
+                    task_done += 1
+
+    lab.tasks_completed = task_done
+
+    too_slow = False
+    if (task_done == len(lab.tasks)) and not lab.is_done:
+        end_time = datetime.now()
+        lab.end_time = end_time
+        lab.is_done = True
+        if lab.deadline < end_time.date():
+            too_slow = True
+
+        discipline = session.query(Discipline).get(assig_discipline.discipline_id)
+
+        scale_point = 100.0 / discipline.max_tasks
+        lab_points = (task_done * scale_point)
+        if too_slow:
+            lab_points *= 0.5
+
+        assig_discipline.point += lab_points
+
+    assig_discipline.home_work = utils.homeworks_to_json(hwork)
+    session.commit()
+    session.close()
